@@ -2,6 +2,7 @@ import {prisma} from "@/lib/prisma"
 import {NextResponse} from "next/server"
 import {z} from "zod"
 import {requireAuth} from "../../../../lib/auth"
+import {RateLimiter} from "../../RateLimiter"
 
 const AuthorSchema = z.object({
     name: z.string().min(1),

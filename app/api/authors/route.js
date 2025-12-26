@@ -2,6 +2,7 @@ import {prisma} from "@/lib/prisma"
 import {NextResponse} from "next/server"
 import {z} from "zod"
 import {requireAuth} from "../../../lib/auth"
+import {RateLimiter} from "../RateLimiter"
 
 const AuthorSchema = z.object({
     name: z.string().min(1),
@@ -9,6 +10,7 @@ const AuthorSchema = z.object({
 
 export async function GET(request){
     try {
+        RateLimiter(request);
 
         const {user} = await requireAuth(request);
         if (!user) {
@@ -18,7 +20,6 @@ export async function GET(request){
           );
         }
 
-        RateLimiter(request);
 
         const authors = await prisma.author.findMany()
         return NextResponse.json({success:true, message:"authors retrieved successfully", data:authors}, {status: 200})

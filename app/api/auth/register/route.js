@@ -14,11 +14,14 @@ export async function POST(request){
 
     try {
         
+        RateLimiter(request);
+
         const body = await request.json()
         const validation = UserSchema.safeParse(body)
 
         if (!validation.success) {
-            return NextResponse.json({success:false,error: validation.error.errors, code:400}, {status: 400})
+            console.error(validation.error.errors)
+            return NextResponse.json({success:false,error: "validasi salah", code:400}, {status: 400})
         }
         const {name, email, role, password} = validation.data
 
@@ -36,7 +39,8 @@ export async function POST(request){
         return NextResponse.json({success:true, message: "user created successfully", data:newUser}, {status: 201})
 
     } catch (error) {
-        return NextResponse.json({success:false, error: error.message, code:500}, {status: 500})
+        console.error(error)
+        return NextResponse.json({success:false, error: "internal server error", code:500}, {status: 500})
     }
 
 }

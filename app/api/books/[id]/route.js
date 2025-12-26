@@ -1,6 +1,7 @@
 import {prisma} from "@/lib/prisma"
 import {NextResponse} from "next/server"
 import {z} from "zod"
+import { RateLimiter } from "../RateLimiter"
 
 const BookSchema = z.object({
     title: z.string().min(1),
@@ -10,6 +11,8 @@ const BookSchema = z.object({
 
 export async function GET(request, {params}){
     try {
+
+        RateLimiter(request)
 
         const resolvedParams = await params;
         const id = parseInt(resolvedParams.id);
@@ -29,15 +32,18 @@ export async function GET(request, {params}){
             return NextResponse.json({success:false, error: "Book not found", code:404}, {status: 404})
         }
 
-        return NextResponse.json({success:true, message:"book updated successfully", data:book}, {status: 200})
+        return NextResponse.json({success:true, message:"book found", data:book}, {status: 200})
     } catch (error) {
-        return NextResponse.json({success:false, error: error.message, code:500}, {status: 500})
+        console.error(error.message)
+        return NextResponse.json({success:false, error: "internal server error", code:500}, {status: 500})
     }
 }
 
 export async function PUT(request, {params}){
 
     try {
+
+        RateLimiter(request)
         
         const resolvedParams = await params;
         const id = parseInt(resolvedParams.id);
@@ -46,7 +52,8 @@ export async function PUT(request, {params}){
         const validation = BookSchema.safeParse(body)
 
         if (!validation.success) {
-            return NextResponse.json({success:false,error: validation.error.errors, code:400}, {status: 400})
+            console.error(validation.error.flatten)
+            return NextResponse.json({success:false,error: "validasi gagal", code:400}, {status: 400})
         }
 
         let updatedData = {
@@ -55,7 +62,7 @@ export async function PUT(request, {params}){
             publisher: body.publisher
         }
 
-        if (body.hapusAuthor ==true) {
+        if (body.hapusAuthor == true) {
             updatedData.author = { disconnect: true }
         }
         else if (body.authorId) {
@@ -70,16 +77,19 @@ export async function PUT(request, {params}){
             }
         })
 
-        return NextResponse.json({success:true, message: "book updated successfully", data:updateBook}, {status: 201})
+        return NextResponse.json({success:true, message: "book updated successfully", data:updateBook}, {status: 200})
 
     } catch (error) {
-        return NextResponse.json({success:false, error: error.message, code:500}, {status: 500})
+        console.error(error.message)
+        return NextResponse.json({success:false, error: "internal server error", code:500}, {status: 500})
     }
 
 }
 
 export async function DELETE(request, {params}){
     try {
+
+        RateLimiter(request)
 
         const resolvedParams = await params;
         const id = parseInt(resolvedParams.id);
@@ -92,12 +102,13 @@ export async function DELETE(request, {params}){
             where: { id: id }
         })
 
-        if (!deletedBook) {
-            return NextResponse.json({success:false, error: "Book not found", code:404}, {status: 404})
-        }
+        // if (!deletedBook) {
+        //     return NextResponse.json({success:false, error: "Book not found", code:404}, {status: 404})
+        // }
 
         return NextResponse.json({success:true, message:"book deleted successfully", data:deletedBook}, {status: 200})
     } catch (error) {
-        return NextResponse.json({success:false, error: error.message, code:500}, {status: 500})
+        console.error(error.message)
+        return NextResponse.json({success:false, error: "internal server error", code:500}, {status: 500})
     }
 }

@@ -8,7 +8,7 @@ export async function middleware(request) {
   // 1. Authorization tidak ada
   if (!authHeader) {
     return new NextResponse(
-      JSON.stringify({ success: false, error: "Unauthorized" }),
+      JSON.stringify({ success: false, error: "Unauthorized", code: 401}),
       { status: 401 }
     );
   }
@@ -18,7 +18,7 @@ export async function middleware(request) {
 
   if (type !== "Bearer" || !token) {
     return new NextResponse(
-      JSON.stringify({ success: false, error: "Invalid authorization format" }),
+      JSON.stringify({ success: false, error: "Invalid authorization format",code: 401 }),
       { status: 401 }
     );
   }
@@ -37,7 +37,7 @@ export async function middleware(request) {
         // Tambahkan logika untuk memeriksa role user di sini
         if (payload.role !== "ADMIN") {
             return new NextResponse(
-                JSON.stringify({ success: false, error: "Forbidden" }),
+                JSON.stringify({ success: false, error: "Forbidden" , code: 403}),
                 { status: 403 }
             );
         }
@@ -46,7 +46,7 @@ export async function middleware(request) {
     if (pathname.startsWith("/api/books") && method === "DELETE") {
         if (payload.role !== "ADMIN") {
             return new NextResponse(
-                JSON.stringify({ success: false, error: "Forbidden" }),
+                JSON.stringify({ success: false, error: "Forbidden", code:403 }),
                 { status: 403 }
             );
         }
@@ -57,7 +57,7 @@ export async function middleware(request) {
   } catch (error) {
     console.error(error)
     return new NextResponse(
-      JSON.stringify({ success: false, error: "Invalid or expired token" }),
+      JSON.stringify({ success: false, error: "Invalid or expired token", code:401 }),
       { status: 401 }
     );
   }

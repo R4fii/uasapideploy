@@ -1,6 +1,7 @@
 import {prisma} from "@/lib/prisma"
 import {NextResponse} from "next/server"
 import {z} from "zod"
+import { RateLimiter } from "../RateLimiter"
 
 const UserSchema = z.object({
     name: z.string().min(1),
@@ -11,6 +12,8 @@ const UserSchema = z.object({
 
 export async function GET(request, {params}){
     try {
+
+        RateLimiter(request)
 
         const resolvedParams = await params;
         const id = parseInt(resolvedParams.id);
@@ -27,16 +30,19 @@ export async function GET(request, {params}){
             return NextResponse.json({success:false, error: "User not found", code:404}, {status: 404})
         }
 
-        return NextResponse.json({success:true, message:"user updated successfully", data:user}, {status: 200})
+        return NextResponse.json({success:true, message:"user found ", data:user}, {status: 200})
     } catch (error) {
-        return NextResponse.json({success:false, error: error.message, code:500}, {status: 500})
+        console.error(error)
+        return NextResponse.json({success:false, error: "internal server error", code:500}, {status: 500})
     }
 }
 
 export async function PUT(request, {params}){
 
     try {
-        
+
+        RateLimiter(request)
+
         const resolvedParams = await params;
         const id = parseInt(resolvedParams.id);
 
@@ -44,7 +50,8 @@ export async function PUT(request, {params}){
         const validation = UserSchema.safeParse(body)
 
         if (!validation.success) {
-            return NextResponse.json({success:false,error: validation.error.errors, code:400}, {status: 400})
+            console.error(validation.error.errors)
+            return NextResponse.json({success:false,error: "validasi gagal", code:400}, {status: 400})
         }
 
         const updateUser = await prisma.user.update({
@@ -57,16 +64,19 @@ export async function PUT(request, {params}){
             }
         })
 
-        return NextResponse.json({success:true, message: "user updated successfully", data:updateUser}, {status: 201})
+        return NextResponse.json({success:true, message: "user updated successfully", data:updateUser}, {status: 200})
 
     } catch (error) {
-        return NextResponse.json({success:false, error: error.message, code:500}, {status: 500})
+        console.error(error)
+        return NextResponse.json({success:false, error: "internal server error", code:500}, {status: 500})
     }
 
 }
 
 export async function DELETE(request, {params}){
     try {
+
+        RateLimiter(request)
 
         const resolvedParams = await params;
         const id = parseInt(resolvedParams.id);
@@ -79,12 +89,13 @@ export async function DELETE(request, {params}){
             where: { id: id }
         })
 
-        if (!deletedUser) {
-            return NextResponse.json({success:false, error: "User not found", code:404}, {status: 404})
-        }
+        // if (!deletedUser) {
+        //     return NextResponse.json({success:false, error: "User not found", code:404}, {status: 404})
+        // }
 
         return NextResponse.json({success:true, message:"user deleted successfully", data:deletedUser}, {status: 200})
     } catch (error) {
-        return NextResponse.json({success:false, error: error.message, code:500}, {status: 500})
+        console.error(error)
+        return NextResponse.json({success:false, error: "internal server error", code:500}, {status: 500})
     }
 }

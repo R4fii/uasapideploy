@@ -2,10 +2,13 @@ import { NextResponse } from "next/server";
 import {prisma} from "@/lib/prisma"
 import bcrypt from "bcryptjs";
 import { SignJWT } from "jose";
+import { RateLimiter } from "../../RateLimiter";
 
 export async function POST(request) {
     try {
         
+        RateLimiter(request);
+
         const {email, password} = await request.json();
 
         const user =  await prisma.user.findUnique({
@@ -38,6 +41,7 @@ export async function POST(request) {
 
 
     } catch (error) {
-        return NextResponse.json({success:false, error: error.message, code:500}, {status: 500})
+        console.error(error)
+        return NextResponse.json({success:false, message: "internal server error", code:500}, {status: 500})
     }
 }

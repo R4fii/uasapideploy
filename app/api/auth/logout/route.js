@@ -9,12 +9,14 @@ export async function PUT(request) {
         
         const authHeader = request.headers.get("authorization");
         if (!authHeader) {
-            throw { status: 401, message: "Unauthorized" };
+            // throw { status: 401, message: "Unauthorized" };
+            return NextResponse.json({success:false, error: "unauthorized", code:401}, {status: 401})
         }
 
         const [type, token] = authHeader.split(" ");
         if (type !== "Bearer" || !token) {
-            throw { status: 401, message: "Invalid authorization format" };
+            // throw { status: 401, message: "Invalid authorization format" };
+            return NextResponse.json({success:false, error: "Invalid authorization format", code:401}, {status: 401})
         }
 
         const { payload } = await jwtVerify(token, secret);
@@ -24,7 +26,7 @@ export async function PUT(request) {
         })
 
         if (!user || !user.token) {
-            return NextResponse.json({success:false, message: "User telah logout", code:401}, {status: 401})
+            return NextResponse.json({success:false, error: "User telah logout atau belum login", code:401}, {status: 401})
         }
 
         await prisma.user.update({
@@ -34,10 +36,11 @@ export async function PUT(request) {
             },
         });
 
-        return NextResponse.json({success:true, message: "logout successful"}, {status: 200})
+        return NextResponse.json({success:true, message: "logout successful", data: user}, {status: 200})
 
 
     } catch (error) {
-        return NextResponse.json({success:false, error: error.message, code:500}, {status: 500})
+        console.error(error)
+        return NextResponse.json({success:false, error: "internal server erro", code:500}, {status: 500})
     }
 }

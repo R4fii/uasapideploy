@@ -6,12 +6,16 @@ const AuthorSchema = z.object({
     name: z.string().min(1),
 })
 
-export async function GET(){
+export async function GET(request){
     try {
+
+        RateLimiter(request);
+
         const authors = await prisma.author.findMany()
         return NextResponse.json({success:true, message:"authors retrieved successfully", data:authors}, {status: 200})
     } catch (error) {
-        return NextResponse.json({success:false, error: error.message, code:500}, {status: 500})
+        console.error(error)
+        return NextResponse.json({success:false, error: "internal server error", code:500}, {status: 500})
     }
 }
 
@@ -19,11 +23,14 @@ export async function POST(request){
 
     try {
         
+        RateLimiter(request);
+
         const body = await request.json()
         const validation = AuthorSchema.safeParse(body)
 
         if (!validation.success) {
-            return NextResponse.json({success:false,error: validation.error.errors, code:400}, {status: 400})
+            console.error(validation.error.errors)
+            return NextResponse.json({success:false,error: "validasi gagal", code:400}, {status: 400})
         }
 
         const newAuthor = await prisma.author.create({
@@ -35,7 +42,8 @@ export async function POST(request){
         return NextResponse.json({success:true, message: "author created successfully", data:newAuthor}, {status: 201})
 
     } catch (error) {
-        return NextResponse.json({success:false, error: error.message, code:500}, {status: 500})
+        console.error(error)
+        return NextResponse.json({success:false, error: "internal server error", code:500}, {status: 500})
     }
 
 }

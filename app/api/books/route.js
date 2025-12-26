@@ -31,7 +31,7 @@ export async function GET(request) {
 
     if (!user) {
       return NextResponse.json(
-      { success: false, message: "user memiliki token tidak invalid" },
+      { success: false, error: "user memiliki token tidak invalid" },
       { status: 500 }
     );
     }
@@ -68,10 +68,12 @@ export async function GET(request) {
       total,
       totalPages,
       data: books,
+      message: "data found"
     });
   } catch (error) {
+    console.error(error)
     return NextResponse.json(
-      { success: false, error: error.message },
+      { success: false, error: "internal server error" },
       { status: 500 }
     );
   }
@@ -81,6 +83,8 @@ export async function POST(request){
 
     try {
         
+        RateLimiter(request)
+
         const body = await request.json()
         const validation = BookSchema.safeParse(body)
 
@@ -102,7 +106,8 @@ export async function POST(request){
         return NextResponse.json({success:true, message: "book created successfully", data:newBook}, {status: 201})
 
     } catch (error) {
-        return NextResponse.json({success:false, error: error.message, code:500}, {status: 500})
+        console.error(error)
+        return NextResponse.json({success:false, error: "internal server error", code:500}, {status: 500})
     }
 
 }

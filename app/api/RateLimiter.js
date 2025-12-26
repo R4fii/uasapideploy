@@ -17,7 +17,7 @@ export function RateLimiter(request, maxRequests = 10, windowMs = 60 * 1000) {
 
   if (record.count > maxRequests) {
     return new Response(
-      JSON.stringify({ success: false, error: "Too Many Requests" }),
+      JSON.stringify({ success: false, error: "Too Many Requests", code: 429 }),
       { status: 429, headers: { "Content-Type": "application/json" } }
     );
   }

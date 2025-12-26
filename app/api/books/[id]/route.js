@@ -1,7 +1,8 @@
 import {prisma} from "@/lib/prisma"
 import {NextResponse} from "next/server"
 import {z} from "zod"
-import { RateLimiter } from "../RateLimiter"
+import { RateLimiter } from "../../RateLimiter"
+import {requireAuth} from "../../../../lib/auth"
 
 const BookSchema = z.object({
     title: z.string().min(1),
@@ -11,6 +12,14 @@ const BookSchema = z.object({
 
 export async function GET(request, {params}){
     try {
+
+        const {user} = await requireAuth(request);
+        if (!user) {
+          return NextResponse.json(
+            { success: false, error: "user memiliki token tidak invalid" },
+            { status: 500 }
+          );
+        }
 
         RateLimiter(request)
 
@@ -42,6 +51,13 @@ export async function GET(request, {params}){
 export async function PUT(request, {params}){
 
     try {
+        const {user} = await requireAuth(request);
+        if (!user) {
+          return NextResponse.json(
+            { success: false, error: "user memiliki token tidak invalid" },
+            { status: 500 }
+          );
+        }
 
         RateLimiter(request)
         
@@ -88,6 +104,14 @@ export async function PUT(request, {params}){
 
 export async function DELETE(request, {params}){
     try {
+
+        const {user} = await requireAuth(request);
+        if (!user) {
+          return NextResponse.json(
+            { success: false, error: "user memiliki token tidak invalid" },
+            { status: 500 }
+          );
+        }
 
         RateLimiter(request)
 

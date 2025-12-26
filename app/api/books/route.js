@@ -31,9 +31,9 @@ export async function GET(request) {
 
     if (!user) {
       return NextResponse.json(
-      { success: false, error: "user memiliki token tidak invalid" },
-      { status: 500 }
-    );
+        { success: false, error: "user memiliki token tidak invalid" },
+        { status: 500 }
+      );
     }
 
     // Panggil rate limiter
@@ -82,7 +82,14 @@ export async function GET(request) {
 export async function POST(request){
 
     try {
-        
+        const {user} = await requireAuth(request);
+        if (!user) {
+          return NextResponse.json(
+            { success: false, error: "user memiliki token tidak invalid" },
+            { status: 500 }
+          );
+        }
+
         RateLimiter(request)
 
         const body = await request.json()

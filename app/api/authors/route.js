@@ -1,6 +1,7 @@
 import {prisma} from "@/lib/prisma"
 import {NextResponse} from "next/server"
 import {z} from "zod"
+import {requireAuth} from "../../../lib/auth"
 
 const AuthorSchema = z.object({
     name: z.string().min(1),
@@ -8,6 +9,14 @@ const AuthorSchema = z.object({
 
 export async function GET(request){
     try {
+
+        const {user} = await requireAuth(request);
+        if (!user) {
+          return NextResponse.json(
+            { success: false, error: "user memiliki token tidak invalid" },
+            { status: 500 }
+          );
+        }
 
         RateLimiter(request);
 
@@ -22,6 +31,14 @@ export async function GET(request){
 export async function POST(request){
 
     try {
+
+        const {user} = await requireAuth(request);
+        if (!user) {
+          return NextResponse.json(
+            { success: false, error: "user memiliki token tidak invalid" },
+            { status: 500 }
+          );
+        }
         
         RateLimiter(request);
 

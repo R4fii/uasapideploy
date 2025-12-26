@@ -1,7 +1,8 @@
 import {prisma} from "@/lib/prisma"
 import {NextResponse} from "next/server"
 import {z} from "zod"
-import { RateLimiter } from "../RateLimiter"
+import { RateLimiter } from "../../RateLimiter"
+import {requireAuth} from "../../../../lib/auth"
 
 const UserSchema = z.object({
     name: z.string().min(1),
@@ -12,6 +13,13 @@ const UserSchema = z.object({
 
 export async function GET(request, {params}){
     try {
+        const {user} = await requireAuth(request);
+        if (!user) {
+          return NextResponse.json(
+            { success: false, error: "user memiliki token tidak invalid" },
+            { status: 500 }
+          );
+        }
 
         RateLimiter(request)
 
@@ -22,7 +30,7 @@ export async function GET(request, {params}){
             return NextResponse.json({success:false, error: "Invalid user ID", code:400}, {status: 400})
         }
 
-        const user = await prisma.user.findUnique({
+        const User = await prisma.user.findUnique({
             where: { id: id }
         })
 
@@ -30,7 +38,7 @@ export async function GET(request, {params}){
             return NextResponse.json({success:false, error: "User not found", code:404}, {status: 404})
         }
 
-        return NextResponse.json({success:true, message:"user found ", data:user}, {status: 200})
+        return NextResponse.json({success:true, message:"user found ", data:User}, {status: 200})
     } catch (error) {
         console.error(error)
         return NextResponse.json({success:false, error: "internal server error", code:500}, {status: 500})
@@ -40,6 +48,14 @@ export async function GET(request, {params}){
 export async function PUT(request, {params}){
 
     try {
+
+        const {user} = await requireAuth(request);
+        if (!user) {
+          return NextResponse.json(
+            { success: false, error: "user memiliki token tidak invalid" },
+            { status: 500 }
+          );
+        }
 
         RateLimiter(request)
 
@@ -75,6 +91,14 @@ export async function PUT(request, {params}){
 
 export async function DELETE(request, {params}){
     try {
+
+        const {user} = await requireAuth(request);
+        if (!user) {
+          return NextResponse.json(
+            { success: false, error: "user memiliki token tidak invalid" },
+            { status: 500 }
+          );
+        }
 
         RateLimiter(request)
 

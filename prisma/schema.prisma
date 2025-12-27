@@ -52,3 +52,12 @@ model Book{
   author Author? @relation(fields: [authorId], references: [id])
 
 }
+
+model Log{
+  id Int @id @default(autoincrement())
+  method String
+  pathname String
+  UserId String?
+  role String?
+  createdAt DateTime @default(now())
+}

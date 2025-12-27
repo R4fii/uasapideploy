@@ -15,7 +15,7 @@ export async function GET(request){
         const {user} = await requireAuth(request);
         if (!user) {
           return NextResponse.json(
-            { success: false, error: "user memiliki token tidak invalid" },
+            { success: false, error: "user memiliki token invalid" },
             { status: 500 }
           );
         }

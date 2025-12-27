@@ -34,7 +34,7 @@ export async function GET(request, {params}){
     }
 }
 
-export async function POST(request){
+export async function PUT(request, {params}){
 
     try {
 
@@ -46,6 +46,9 @@ export async function POST(request){
           );
         }
 
+        const resolvedParams = await params;
+        const id = parseInt(resolvedParams.id);
+
         RateLimiter(request);
         
         const body = await request.json()
@@ -56,17 +59,49 @@ export async function POST(request){
             return NextResponse.json({success:false,error: "validasi gagal", code:400}, {status: 400})
         }
 
-        const newAuthor = await prisma.author.create({
+        const newAuthor = await prisma.author.update({
+            where: {id:id},
             data:{
                 name: body.name
             }
         })
 
-        return NextResponse.json({success:true, message: "author created successfully", data:newAuthor}, {status: 201})
+        return NextResponse.json({success:true, message: "author updated successfully", data:newAuthor}, {status: 201})
 
     } catch (error) {
         console.error(error)
         return NextResponse.json({success:false, error: "internal server error", code:500}, {status: 500})
     }
 
+}
+
+export async function DELETE(request, {params}){
+    try {
+
+        const {user} = await requireAuth(request);
+        if (!user) {
+          return NextResponse.json(
+            { success: false, error: "user memiliki token tidak invalid" },
+            { status: 500 }
+          );
+        }
+
+        RateLimiter(request)
+
+        const resolvedParams = await params;
+        const id = parseInt(resolvedParams.id);
+
+        if (isNaN(id)) {
+            return NextResponse.json({success:false, error: "Invalid author ID", code:400}, {status: 400})
+        }
+
+        const deletedAuthor = await prisma.author.delete({
+            where: { id: id }
+        })
+
+        return NextResponse.json({success:true, message:"author deleted successfully", data:deletedAuthor}, {status: 200})
+    } catch (error) {
+        console.error(error.message)
+        return NextResponse.json({success:false, error: "internal server error", code:500}, {status: 500})
+    }
 }

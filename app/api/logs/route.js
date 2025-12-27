@@ -12,7 +12,7 @@ export async function POST(request) {
 
     const body = await request.json();
 
-    log = await prisma.log.create({
+    const log = await prisma.log.create({
       data: {
         method: body.method,
         pathname: body.pathname,

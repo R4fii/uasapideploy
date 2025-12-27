@@ -21,7 +21,7 @@ export function logging(request, payload) {
   };
 
   // 🔥 FIRE & FORGET (tidak await)
-  fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/log`, {
+  fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/logs`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

@@ -16,7 +16,7 @@ export async function POST(request) {
       data: {
         method: body.method,
         pathname: body.pathname,
-        userId: body.id,
+        UserId: body.id,
         role: body.role,
       },
     });

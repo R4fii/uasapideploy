@@ -10,7 +10,7 @@ export async function POST(request) {
       return new Response({success: false, error: "forbidden",code: 403 }, {status:403});
     }
 
-    const body = await req.json();
+    const body = await request.json();
 
     log = await prisma.log.create({
       data: {

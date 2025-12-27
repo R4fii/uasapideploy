@@ -16,7 +16,7 @@ export function logging(request, payload) {
   const data = {
     method,
     pathname,
-    userId: payload?.id ?? null,
+    UserId: payload?.id ?? null,
     role: payload?.role ?? null,
   };
 

@@ -1,7 +1,7 @@
 // /app/api/_rateLimiter.js
 const ipStore = new Map(); // masih di memory, persisten selama dev server hidup
 
-export function RateLimiter(request, maxRequests = 10, windowMs = 60 * 1000) {
+export function RateLimiter(request, maxRequests = 3, windowMs = 60 * 1000) {
   const ip = request.headers.get("x-forwarded-for") || "unknown";
   const now = Date.now();
 

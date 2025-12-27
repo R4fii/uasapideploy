@@ -31,7 +31,7 @@ export async function GET(request) {
 
     if (!user) {
       return NextResponse.json(
-        { success: false, error: "user memiliki token tidak invalid" },
+        { success: false, error: "user memiliki token invalid" },
         { status: 500 }
       );
     }
